@@ -33,8 +33,12 @@ hold off
 Freq = f(MaxFreq)
 
 % Low-pass filter
-h  = fdesign.lowpass('Fp,Fst,Ap,Ast', 7000, 7500, 1, 60, fs);
-Hd = design(h, 'butter');
+%h  = fdesign.lowpass('Fp,Fst,Ap,Ast', 7000, 7500, 1, 60, fs);
+%Hd = design(h, 'butter');
+
+% Chebyshev low-pass filter
+h  = fdesign.lowpass(7000, 7800, 1, 40, fs);
+Hd = design(h, 'cheby1', 'MatchExactly', 'passband');
 
 % Remove 8kHz tone
 scr_y_lp = filter(Hd, scr_y);
@@ -49,8 +53,8 @@ scr_y_sin_lp = filter(Hd, scr_y_sin);
 % Unscrambled freq domain
 figure(5);
 f = linspace(-fs/2,fs/2,N);
-scr_Y_sin = fft(scr_y_sin_lp,N);
-plot(f,fftshift(abs(scr_Y_sin))); 
+unscr_Y = fft(scr_y_sin_lp,N);
+plot(f,fftshift(abs(unscr_Y)));
 
 % Play unscrambled sound
 sound(scr_y_sin_lp, fs)
