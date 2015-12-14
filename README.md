@@ -13,6 +13,8 @@ However, Professor Peach has himself been arrested by the police for his lewd ac
 1. Work out how the scrambling is done by recording your own voice and analysing the scrambled message produced by the scrambling program “The scrambler file” written in the protected Matlab code.
 2. Design and build one digital and one analogue real-time audio descrambler to work out what the secret message is.
 
+Having Fun
+
 ## Authors
 - Daniel Saul
 - Franky Saxena
