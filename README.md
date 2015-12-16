@@ -1,6 +1,6 @@
 # audio-descrambler-scenario
 Scenario X, 2nd Year UCL EEE, Real-Time Audio Descrambler Project  
-December 2015
+Decemberr 2015
 
 A group scenario project to build two real-time audio descramblers - one digital and one analogue. The digital descramblers uses an MSP432 programmed in C whilst the analogue uses entirely hardware: capacitors, inductors, resistors and op-amps.
 
