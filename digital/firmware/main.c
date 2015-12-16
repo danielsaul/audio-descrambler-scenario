@@ -2,12 +2,17 @@
  * Real-time Audio Descrambler Scenario
  * Digital MSP432
  * Daniel Saul, 2015
+ *
+ * main.c
+ *
  */
 
 #include "driverlib.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+
+#include "filter.h"
 
 const bool DEBUG = true;
 
@@ -95,6 +100,8 @@ void adc_isr(void)
 	uint64_t status = MAP_ADC14_getEnabledInterruptStatus();
 	MAP_ADC14_clearInterruptFlag(status);
 
-  if (status & ADC_)
+  if (status & ADC_INT0){
+
+  }
 
 }

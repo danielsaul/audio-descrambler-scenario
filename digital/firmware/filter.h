@@ -10,30 +10,32 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include "driverlib.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
 
 // 8kHz Bandstop Chebyshev Filter Coefficients
-const double bandstop_num[3] = {1, -1.0719921366, 1};
-const double bandstop_den[3] = {1, -1.0584530227, 0.97474027397};
-const double bandstop_buf[3] = {0, 0, 0};
+static double bandstop_g = 0.9873701369842;
+static double bandstop_num[3] = {1, -1.071992136563, 1};
+static double bandstop_den[3] = {1, -1.058453022724, 0.9747402739684};
+double bandstop_buf[3];
 
 
 // 5kHz Low-pass Chebyshev Filter Coefficients
-const double lowpass_a_num[3] = {1, 2, 1};
-const double lowpass_a_den[3] = {1, -1.499554496, 0.84821868172};
-const double lowpass_a_buf[3] = {0, 0, 0};
+static double lowpass_a_g = 0.08716604622656;
+static double lowpass_a_num[3] = {1, 2, 1};
+static double lowpass_a_den[3] = {1, -1.49955449681, 0.8482186817167};
+double lowpass_a_buf[3];
 
-const double lowpass_b_num[3] = {1, 2, 1};
-const double lowpass_b_den[3] = {1, -1.554785180, 0.64929543814};
-const double lowpass_b_buf[3] = {0, 0, 0};
+static double lowpass_b_g = 0.02362756463502;
+static double lowpass_b_num[3] = {1, 2, 1};
+static double lowpass_b_den[3] = {1, -1.554785179597, 0.6492954381366};
+double lowpass_b_buf[3];
 
 
-static double bandstop(double input);
-static double lowpass(double input);
-static double filter(double x, double *w, double *b, double *a);
+double bandstop(double input);
+double lowpass(double input);
+double filter(double x, double *w, double *b, double *a);
 void update_buffer(double *w);
 
 #endif

@@ -9,12 +9,16 @@
 
 #include "filter.h"
 
+double bandstop_buf[3] = {0,0,0};
+double lowpass_a_buf[3] = {0,0,0};
+double lowpass_b_buf[3] = {0,0,0};
+
 //////
 // Implements Infinite Impulse Response Filter
 //////
 
 // Bandstop filter, 2nd order (1 section)
-static double bandstop(double input){
+double bandstop(double input){
 
   update_buffer(bandstop_buf);
   double output = filter(input, bandstop_buf, bandstop_num, bandstop_den);
@@ -24,7 +28,7 @@ static double bandstop(double input){
 }
 
 // Lowpass filter, 4th order (2 sections)
-static double lowpass(double input){
+double lowpass(double input){
 
   update_buffer(lowpass_a_buf);
   double outa = filter(input, lowpass_a_buf, lowpass_a_num, lowpass_a_den);
@@ -36,9 +40,9 @@ static double lowpass(double input){
 }
 
 // Second-order IIR filter, direct form II
-static double filter(double x, double *w, double *b, double *a){
+double filter(double x, double *w, double *b, double *a){
 
-  double w[2] = x - (a[1] * w[1]) - (a[2] * w[0]);
+  w[2] = x - (a[1] * w[1]) - (a[2] * w[0]);
   double y = (b[0] * w[2]) + (b[1] * w[1]) + (b[2] * w[0]);
 
   return y;
