@@ -14,9 +14,14 @@
 
 #include "filter.h"
 
+#define PI 3.14159265
+
 const bool DEBUG = true;
 
-static volatile uint_fast16_t buffer[8];
+static volatile double currentADC;
+//static volatile double currentInput;
+
+double sine[50];
 
 
 int main(void)
@@ -40,6 +45,11 @@ int main(void)
     P5SEL1 |= BIT5;
     P5SEL0 |= BIT5;
 
+    // Output pins
+    P2DIR = 0xFF;
+    P2OUT = 0x00;
+
+
     // Configuring pins for high frequency crystal (HFXT) crystal for 48 MHz clock
     MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_PJ, GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
     MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P4, GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION); // P4.3 -> 48MHz
@@ -54,9 +64,9 @@ int main(void)
 
     // Configure ADC14 - pin 5.5
     MAP_ADC14_enableModule();
-    MAP_ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_1, 0);
+    MAP_ADC14_initModule(ADC_CLOCKSOURCE_MCLK, ADC_PREDIVIDER_1, ADC_DIVIDER_4, 0);
     MAP_ADC14_configureSingleSampleMode(ADC_MEM0, true);
-    MAP_ADC14_configureConversionMemory(ADC_MEM0, ADC_VREFPOS_AVCC_VREFNEG_VSS, ADC_INPUT_A0, false);
+    MAP_ADC14_configureConversionMemory(ADC_MEM0, ADC_VREFPOS_INTBUF_VREFNEG_VSS, ADC_INPUT_A0, false);
     MAP_ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
     MAP_ADC14_enableConversion();
     MAP_ADC14_enableInterrupt(ADC_INT0);
@@ -75,6 +85,13 @@ int main(void)
     MAP_FPU_enableModule();
     MAP_FPU_enableLazyStacking();
 
+    // Generate 7kHz sine wave at 50kHz sampling rate
+    int N = 0;
+    for(N=0;N<50;N++){
+        double t = N*2*PI*7/50;
+        sine[N] = sin(t);
+    }
+
     while (1)
     {
       //MAP_PCM_gotoLPM0();
@@ -82,12 +99,36 @@ int main(void)
 
 }
 
+int N = 0;
+
 // 50kHz Systick
 void systick_isr(void)
 {
 	P6OUT |= BIT0; // P6.0 high
 
   MAP_ADC14_toggleConversionTrigger(); // ADC Conversion
+
+  // 0 magnitude value - (600/1200)*16384
+  double input = currentADC - 8192;
+
+  // Bandstop filter input, remove 8kHz tone
+  double input_bandstop = bandstop(input);
+
+  // Multiply by 7kHz sine wave
+  double input_bandstop_sine = input_bandstop * sine[N];
+
+  // Filter out upper sideband
+  double filtered = lowpass(input_bandstop_sine);
+
+  filtered = filtered + 8192;
+  uint8_t output = (filtered/64);
+
+  P2OUT = output;
+
+  N++;
+  if(N > 49){  // 7 full sine waves, 50 samples
+    N = 0;
+  }
 
 	P6OUT &= ~BIT0; // P6.0 low
 }
@@ -101,7 +142,8 @@ void adc_isr(void)
 	MAP_ADC14_clearInterruptFlag(status);
 
   if (status & ADC_INT0){
-
+    currentADC = MAP_ADC14_getResult(ADC_MEM0);
+    //currentInput = (currentADC * 1.2) / 16384;
   }
 
 }
