@@ -22,6 +22,8 @@ double bandstop_buf[3];
 
 
 // 5kHz Low-pass Chebyshev Filter Coefficients
+static double lowpass_g = 0.8912509381337;
+
 static double lowpass_a_g = 0.08716604622656;
 static double lowpass_a_num[3] = {1, 2, 1};
 static double lowpass_a_den[3] = {1, -1.49955449681, 0.8482186817167};

@@ -23,7 +23,7 @@ double bandstop(double input){
   update_buffer(bandstop_buf);
   double output = filter(input, bandstop_buf, bandstop_num, bandstop_den);
 
-  return output;
+  return output * bandstop_g;
 
 }
 
@@ -33,9 +33,9 @@ double lowpass(double input){
   update_buffer(lowpass_a_buf);
   double outa = filter(input, lowpass_a_buf, lowpass_a_num, lowpass_a_den);
   update_buffer(lowpass_b_buf);
-  double output = filter(outa, lowpass_b_buf, lowpass_b_num, lowpass_b_den);
+  double output = filter(outa * lowpass_a_g, lowpass_b_buf, lowpass_b_num, lowpass_b_den);
 
-  return output;
+  return output * lowpass_b_g;
 
 }
 
