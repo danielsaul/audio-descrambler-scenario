@@ -36,19 +36,27 @@ Freq = f(MaxFreq)
 %h  = fdesign.lowpass('Fp,Fst,Ap,Ast', 7000, 7500, 1, 60, fs);
 %Hd = design(h, 'butter');
 
+% Chebyshev Band-stop filter
+h  = fdesign.bandstop('N,Fp1,Fp2,Ap', 2, 7800, 8200, 1, fs);
+bandstop = design(h, 'cheby1');
+
 % Chebyshev low-pass filter
 h  = fdesign.lowpass(7000, 7800, 1, 40, fs);
 Hd = design(h, 'cheby1', 'MatchExactly', 'passband');
 
+% Chebyshev low-pass 6000
+h  = fdesign.lowpass('N,Fp,Ap', 4, 5000, 1, fs);
+lowpass = design(h, 'cheby1');
+
 % Remove 8kHz tone
-scr_y_lp = filter(Hd, scr_y);
+scr_y_lp = filter(bandstop, scr_y);
 
 % Scrambled * 7kHz
 sine = sin(2*pi*7000*t).';
 scr_y_sin = scr_y_lp .* sine;
 
 % Remove upper frequencies
-scr_y_sin_lp = filter(Hd, scr_y_sin);
+scr_y_sin_lp = filter(lowpass, scr_y_sin);
 
 % Unscrambled freq domain
 figure(5);
