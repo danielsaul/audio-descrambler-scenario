@@ -22,13 +22,26 @@ int main(void){
       int i;
       for(i = 0; i < 10000; i++){
           t = i/fs;
-          s = sin(2*PI*t*f);
+          s = sin(2*PI*t*f)*sin(2*PI*t*3000);
           printf("%f , ", s);
           fprintf(j, "%f ,", s);
-          x = bandstop(s);
+          x = lowpass(s);
           printf("%f\n", x);
           fprintf(j, "%f\n", x);
       }
+
+      /* i;
+      for(i = 0; i < 1000; i++){
+          t = i/fs;
+          s = 1;
+          printf("%f , ", s);
+          fprintf(j, "%f ,", s);
+          x = lowpass(s);
+          printf("%f\n", x);
+          fprintf(j, "%f\n", x);
+      }*/
+
+
 
 
 fclose(j);
