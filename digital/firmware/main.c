@@ -14,14 +14,14 @@
 
 #include "filter.h"
 
-#define PI 3.14159265
+#define PI 3.14159265f
 
-const bool DEBUG = true;
+//const bool DEBUG = true;
 
-static volatile double currentADC;
-//static volatile double currentInput;
+static volatile float currentADC = 0;
+//static volatile float currentInput;
 
-double sine[50];
+static volatile float sine[50];
 
 
 int main(void)
@@ -84,12 +84,17 @@ int main(void)
     // Enable FPU
     MAP_FPU_enableModule();
     MAP_FPU_enableLazyStacking();
+    FPU_setFlushToZeroMode(FPU_FLUSH_TO_ZERO_EN);
 
     // Generate 7kHz sine wave at 50kHz sampling rate
     int N = 0;
     for(N=0;N<50;N++){
-        double t = N*2*PI*7/50;
-        sine[N] = sin(t);
+        float a = N*7.0f;
+        float b = a/50.0f;
+        float c = b*2.0f*PI;
+        //float t = N*2*PI*7/50;
+        float n = sin(c);
+        sine[N] = n;
     }
 
     while (1)
@@ -99,7 +104,7 @@ int main(void)
 
 }
 
-int N = 0;
+int M = 0;
 
 // 50kHz Systick
 void systick_isr(void)
@@ -109,25 +114,26 @@ void systick_isr(void)
   MAP_ADC14_toggleConversionTrigger(); // ADC Conversion
 
   // 0 magnitude value - (600/1200)*16384
-  double input = currentADC - 8192;
+  float input = currentADC;
+  float input2 = input - 8192.0f;
 
   // Bandstop filter input, remove 8kHz tone
-  double input_bandstop = bandstop(input);
+  float input_bandstop = bandstop(input2);
 
   // Multiply by 7kHz sine wave
-  double input_bandstop_sine = input_bandstop * sine[N];
+  float input_bandstop_sine = (input_bandstop * sine[M]);
 
   // Filter out upper sideband
-  double filtered = lowpass(input_bandstop_sine);
+  filtered = lowpass(input_bandstop_sine);
 
-  filtered = filtered + 8192;
-  uint8_t output = (filtered/64);
+  float filtered = input_bandstop_sine + 8192.0f;
+  float output = (filtered/64.0f);
 
   P2OUT = output;
 
-  N++;
-  if(N > 49){  // 7 full sine waves, 50 samples
-    N = 0;
+  M = M+1;
+  if(M > 49){  // 7 full sine waves, 50 samples
+    M = 0;
   }
 
 	P6OUT &= ~BIT0; // P6.0 low
